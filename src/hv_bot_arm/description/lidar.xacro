@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+
+        <link name="two_d_lidar">
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="0.06" radius="0.075"/>
+                </geometry>
+            </collision>
+
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="0.06" radius="0.075"/>
+                </geometry>
+                <material name="aluminium"/>
+            </visual>
+
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <mass value="0.1"/>
+                <xacro:cylinder_inertia m="0.1" r="0.075" h="0.06"/>
+            </inertial>
+        </link>
+
+        <joint name="two_d_lidar_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="two_d_lidar"/>
+            <origin xyz="0.0 0 0.08" rpy="0 0 0" />
+        </joint>
+
+        <gazebo reference="two_d_lidar">
+            <material>Gazebo/White</material>
+        </gazebo>
+
+
+</robot>

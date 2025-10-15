@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="hv_bot">
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
+    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
+    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
+    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="arm">
+        <joint name="base_prismatic_torso"/>
+        <joint name="shoulder_joint"/>
+        <joint name="upper_arm_joint"/>
+        <joint name="elbow_joint"/>
+        <joint name="lower_arm_joint"/>
+        <joint name="wrist_joint"/>
+        <joint name="gripper_joint"/>
+    </group>
+    <group name="gripper">
+        <joint name="finger_joint"/>
+    </group>
+    <group name="base">
+        <joint name="middle_left_wheel_joint"/>
+        <joint name="middle_right_wheel_joint"/>
+    </group>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="end_effector" parent_link="gripper_link" group="gripper"/>
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="back_left_wheel" link2="back_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="base_link_torso" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="chassis_link" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="elbow_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="finger_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="front_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="front_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="gripper_camera_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="gripper_camera_link_optical" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="gripper_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="imu_link" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="kinect_camera" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="back_left_wheel" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="back_left_wheel" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="base_link_torso" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="chassis_link" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="elbow_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="finger_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="front_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="front_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="gripper_camera_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="gripper_camera_link_optical" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="gripper_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="imu_link" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="kinect_camera" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="back_right_wheel" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="back_right_wheel" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="base_link_torso" link2="chassis_link" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="front_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="front_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="imu_link" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="kinect_camera" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="base_link_torso" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="torso_link" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="base_link_torso" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="elbow_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="finger_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="front_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="front_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="gripper_camera_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="gripper_camera_link_optical" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="gripper_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="imu_link" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="kinect_camera" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="chassis_link" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="chassis_link" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="front_left_wheel" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="front_right_wheel" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="imu_link" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="kinect_camera" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="lower_arm_link" reason="Adjacent"/>
+    <disable_collisions link1="elbow_link" link2="middle_left_wheel" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="middle_right_wheel" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="stereo_camera" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="elbow_link" link2="upper_arm_link" reason="Adjacent"/>
+    <disable_collisions link1="finger_link" link2="front_left_wheel" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="front_right_wheel" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="gripper_camera_link_optical" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="gripper_link" reason="Adjacent"/>
+    <disable_collisions link1="finger_link" link2="imu_link" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="kinect_camera" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="middle_left_wheel" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="middle_right_wheel" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="stereo_camera" reason="Never"/>
+    <disable_collisions link1="finger_link" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="front_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="front_left_wheel" link2="gripper_camera_link" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="gripper_camera_link_optical" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="gripper_link" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="imu_link" reason="Adjacent"/>
+    <disable_collisions link1="front_left_wheel" link2="kinect_camera" reason="Adjacent"/>
+    <disable_collisions link1="front_left_wheel" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="front_left_wheel" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="front_left_wheel" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="front_left_wheel" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="front_left_wheel" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="front_left_wheel" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="gripper_camera_link" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="gripper_camera_link_optical" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="gripper_link" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="imu_link" reason="Adjacent"/>
+    <disable_collisions link1="front_right_wheel" link2="kinect_camera" reason="Adjacent"/>
+    <disable_collisions link1="front_right_wheel" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="front_right_wheel" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="front_right_wheel" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="front_right_wheel" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="front_right_wheel" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="front_right_wheel" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="gripper_camera_link_optical" reason="Adjacent"/>
+    <disable_collisions link1="gripper_camera_link" link2="gripper_link" reason="Adjacent"/>
+    <disable_collisions link1="gripper_camera_link" link2="imu_link" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="kinect_camera" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="middle_left_wheel" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="middle_right_wheel" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="stereo_camera" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="gripper_link" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="imu_link" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="kinect_camera" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="middle_left_wheel" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="middle_right_wheel" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="stereo_camera" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="gripper_camera_link_optical" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="gripper_link" link2="imu_link" reason="Never"/>
+    <disable_collisions link1="gripper_link" link2="kinect_camera" reason="Never"/>
+    <disable_collisions link1="gripper_link" link2="middle_left_wheel" reason="Never"/>
+    <disable_collisions link1="gripper_link" link2="middle_right_wheel" reason="Never"/>
+    <disable_collisions link1="gripper_link" link2="stereo_camera" reason="Never"/>
+    <disable_collisions link1="gripper_link" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="gripper_link" link2="wrist_link" reason="Adjacent"/>
+    <disable_collisions link1="imu_link" link2="kinect_camera" reason="Adjacent"/>
+    <disable_collisions link1="imu_link" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="imu_link" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="imu_link" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="imu_link" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="imu_link" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="imu_link" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="imu_link" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="imu_link" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="imu_link" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="kinect_camera" link2="lower_arm_link" reason="Never"/>
+    <disable_collisions link1="kinect_camera" link2="middle_left_wheel" reason="Adjacent"/>
+    <disable_collisions link1="kinect_camera" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="kinect_camera" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="kinect_camera" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="kinect_camera" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="kinect_camera" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="kinect_camera" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="kinect_camera" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="lower_arm_link" link2="middle_left_wheel" reason="Never"/>
+    <disable_collisions link1="lower_arm_link" link2="middle_right_wheel" reason="Never"/>
+    <disable_collisions link1="lower_arm_link" link2="stereo_camera" reason="Never"/>
+    <disable_collisions link1="lower_arm_link" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="lower_arm_link" link2="wrist_link" reason="Adjacent"/>
+    <disable_collisions link1="middle_left_wheel" link2="middle_right_wheel" reason="Adjacent"/>
+    <disable_collisions link1="middle_left_wheel" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="middle_left_wheel" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="middle_left_wheel" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="middle_left_wheel" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="middle_left_wheel" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="middle_left_wheel" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="middle_right_wheel" link2="shoulder_link" reason="Never"/>
+    <disable_collisions link1="middle_right_wheel" link2="stereo_camera" reason="Adjacent"/>
+    <disable_collisions link1="middle_right_wheel" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="middle_right_wheel" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="middle_right_wheel" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="middle_right_wheel" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="shoulder_link" link2="stereo_camera" reason="Never"/>
+    <disable_collisions link1="shoulder_link" link2="torso_link" reason="Adjacent"/>
+    <disable_collisions link1="shoulder_link" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="shoulder_link" link2="upper_arm_link" reason="Adjacent"/>
+    <disable_collisions link1="stereo_camera" link2="torso_link" reason="Never"/>
+    <disable_collisions link1="stereo_camera" link2="two_d_lidar" reason="Adjacent"/>
+    <disable_collisions link1="stereo_camera" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="stereo_camera" link2="wrist_link" reason="Never"/>
+    <disable_collisions link1="torso_link" link2="two_d_lidar" reason="Never"/>
+    <disable_collisions link1="two_d_lidar" link2="upper_arm_link" reason="Never"/>
+    <disable_collisions link1="two_d_lidar" link2="wrist_link" reason="Never"/>
+</robot>

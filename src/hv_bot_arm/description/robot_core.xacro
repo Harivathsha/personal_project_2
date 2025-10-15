@@ -1,0 +1,583 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hv_bot">
+
+
+    <xacro:include filename="$(find hv_bot_arm)/description/materials.xacro" />
+    <xacro:include filename="$(find hv_bot_arm)/description/macros.xacro" />
+
+  <!-- Base -->
+
+    <!--................................ XACRO CONSTANTS .............................. -->
+
+    <xacro:property name="chassis_mass" value="70"/>
+    <xacro:property name="chassis_length" value="0.9"/>
+    <xacro:property name="chassis_width" value="0.64"/>
+    <xacro:property name="chassis_height" value="0.19"/>
+
+    <xacro:property name="traction_wheel_mass" value="1"/>
+    <xacro:property name="traction_wheel_base" value="0.88"/>
+    <xacro:property name="traction_max_wheel_torque" value="20000"/>
+    <xacro:property name="traction_wheel_friction" value="5.0"/>
+
+    <xacro:property name="trolley_wheel_mass" value="0.1"/>
+    <xacro:property name="trolley_track_width" value="0.54"/>
+    <xacro:property name="trolley_wheel_friction" value="0.0"/>
+    <xacro:property name="trolley_wheel_radius" value="0.06"/>
+    <!-- a small constant -->
+    <xacro:property name="eps" value="0.002"/>
+
+    <xacro:property name="traction_wheel_radius" value="0.1"/>
+    <xacro:property name="traction_wheel_width" value="0.05"/>
+    <xacro:property name="traction_track_width" value="0.6"/>
+
+    <xacro:property name="two_d_lidar_update_rate" value="30"/>
+    <xacro:property name="two_d_lidar_sample_size" value="361"/>
+    <xacro:property name="two_d_lidar_min_angle" value="0"/>
+    <xacro:property name="two_d_lidar_max_angle" value="360"/>
+    <xacro:property name="two_d_lidar_min_range" value="0.55"/>
+    <xacro:property name="two_d_lidar_max_range" value="16"/>
+
+    <xacro:property name="camera_baseline" value="0.06"/>
+    <xacro:property name="camera_height" value="0.10"/>
+    <xacro:property name="camera_horizontal_fov" value="60"/>
+
+    <xacro:arg name="robot_namespace" default=""/>
+    <xacro:arg name="wheel_odom_topic" default="odom" />
+    <xacro:arg name="camera_enabled" default="false" />
+    <xacro:arg name="stereo_camera_enabled" default="false" />
+    <xacro:arg name="two_d_lidar_enabled" default="false" />
+    <xacro:arg name="publish_wheel_odom_tf" default="true" />
+    <xacro:arg name="conveyor_enabled" default="false"/>
+    <xacro:arg name="ground_truth_frame" default="map"/>
+    <xacro:arg name="sim_gazebo" default="false" />
+    <xacro:arg name="sim_ign" default="false" />
+    <xacro:arg name="sim_gz" default="false" />
+    <xacro:arg name="odometry_source" default="world" />
+
+    <xacro:property name="odometry_source" value="$(arg odometry_source)"/>
+
+    <!-- ............................... LOAD MACROS ................................. -->
+
+    <xacro:include filename="$(find hv_bot_arm)/description/gz.xacro"/>
+
+    <!-- ................................ BASE LINK .................................. -->
+    <link name="base_footprint"/>
+
+    <link name="base_link"/>
+
+    <joint name="base_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0.0 0 ${chassis_height/2 + traction_wheel_radius}" rpy="0 0 0.0" />
+    </joint>
+
+    <link name="chassis_link">
+
+        <collision>
+            <origin xyz="0 0 -0.05" rpy="0 0 0" />
+            <geometry>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+            </geometry>
+        </collision>
+
+        <visual>
+            <origin xyz="0 0 -0.205" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="file://$(find hv_bot_arm)/meshes/bcr_bot_mesh.dae" scale="1 1 1"/>
+            </geometry>
+        </visual>
+
+        <inertial>
+            <mass value="${chassis_mass}" />
+            <xacro:box_inertia m="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z = "${chassis_height}"/>
+        </inertial>
+
+    </link>
+
+    <joint name="chassis_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="chassis_link"/>
+        <origin xyz="0.0 0 0" rpy="0 0 0.0" />
+    </joint>
+
+    <!-- ................................ WHEELS ..................................... -->
+
+    <xacro:trolley_wheel cardinality="front" dexterity="left" origin_x="${chassis_length/2}" origin_y="${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
+    <xacro:trolley_wheel cardinality="front" dexterity="right" origin_x="${chassis_length/2}" origin_y="-${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
+
+    <xacro:trolley_wheel cardinality="back" dexterity="left" origin_x="-${chassis_length/2}" origin_y="${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
+    <xacro:trolley_wheel cardinality="back" dexterity="right" origin_x="-${chassis_length/2}" origin_y="-${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
+
+    <xacro:traction_wheel cardinality="middle" dexterity="left" origin_x="0" origin_y="${traction_track_width/2}" origin_z="-${chassis_height/2+2*trolley_wheel_radius+eps-traction_wheel_radius}"/>
+    <xacro:traction_wheel cardinality="middle" dexterity="right" origin_x="0" origin_y="-${traction_track_width/2}" origin_z="-${chassis_height/2+2*trolley_wheel_radius+eps-traction_wheel_radius}"/>
+
+
+  <link
+    name="base_link_torso">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 1.57 0" />
+      <mass value="5.0"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0"
+               iyy="0.01" iyz="0.0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://hv_bot_arm/meshes/base_link.STL" scale="1000 1000 1000"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 1.57 0" />
+      <geometry>
+        <mesh
+          filename="package://hv_bot_arm/meshes/base_link.STL" scale="1000 1000 1000"/>
+      </geometry>
+    </collision>
+  </link>
+
+    <joint name="torso_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="base_link_torso"/>
+        <origin xyz="0.0 0 0.145" rpy="1.57 0 -1.57" />
+    </joint>
+
+  <link name = "torso_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/torso.STL" scale="1000 1000 1000"/>      
+        </geometry>
+      <origin rpy = "0 0 0.0" xyz = "0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/torso.STL" scale="1000 1000 1000"/>     
+         </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0"/>
+      <mass value="0.480879"/>
+      <inertia ixx="0.222" ixy="0" ixz="0" iyy="0.395" iyz="0" izz="0.222"/>
+    </inertial>
+  </link>
+
+
+  <joint name = "base_prismatic_torso" type="prismatic">
+    <parent link = "base_link_torso"/>
+    <child link = "torso_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="0" upper="0.4" velocity="0.5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/> <!--pos-->
+  </joint>
+    
+  <joint name="shoulder_joint" type="revolute">
+    <origin rpy="1.57 4.71079637 3.14" xyz="0.0 0.8 -0.05"/>
+    <parent link="torso_link"/>
+    <child link="shoulder_link"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="100"/>
+    <dynamics damping="0.1" friction="0.1"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="shoulder_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/DAE/shoulder/shoulder.dae" scale="1.5 1.5 1.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/STL/shoulder/shoulder.stl" scale="1.5 1.5 1.5" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0000223482 0.0000414609 0.0066287000"/>
+      <mass value="0.480879"/>
+      <inertia ixx="0.222" ixy="0" ixz="0" iyy="0.395" iyz="0" izz="0.222"/>
+    </inertial>
+    <surface>
+      <friction>
+        <ode>
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+        </ode>
+      </friction>
+      <bounce>
+        <restitution_coefficient>0.01</restitution_coefficient>
+        <threshold>0</threshold>
+      </bounce>
+      <contact>
+        <ode>
+          <max_vel>10</max_vel>
+        </ode>
+      </contact>
+    </surface>
+  </link>
+  <joint name="upper_arm_joint" type="revolute">
+  <origin rpy="0 0 0" xyz="0.0 0.005 0.0415"/>
+    <parent link="shoulder_link"/>
+    <child link="upper_arm_link"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="100"/>
+    <dynamics damping="0.1" friction="0.1"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="upper_arm_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/DAE/upper_arm/upper_arm.dae" scale="1.5 1.5 1.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/STL/upper_arm/upper_arm.stl" scale="1.5 1.5 1.5" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0"/>
+      <mass value="0.298"/>
+      <inertia ixx="0.002176" ixy="-0.0000030658" ixz="0.0" iyy="0.00005757" iyz="0.0" izz="0.002186"/>
+    </inertial>
+    <surface>
+      <friction>
+        <ode>
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+        </ode>
+      </friction>
+      <bounce>
+        <restitution_coefficient>0.01</restitution_coefficient>
+        <threshold>0</threshold>
+      </bounce>
+      <contact>
+        <ode>
+          <max_vel>10</max_vel>
+        </ode>
+      </contact>
+    </surface>
+  </link>
+  <joint name="elbow_joint" type="revolute">
+  <origin rpy="0 0 0" xyz="0.0 0.0 0.10275"/>
+    <parent link="upper_arm_link"/>
+    <child link="elbow_link"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="100"/>
+    <dynamics damping="0.1" friction="0.1"/>
+    <axis xyz="1 0 0"/>
+  </joint>
+  <link name="elbow_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/DAE/elbow/elbow.dae" scale="1.5 1.5 1.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/STL/elbow/elbow.stl" scale="1.5 1.5 1.5" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.1079630000 0.0001158760 0"/>
+      <mass value="0.234589"/>
+      <inertia ixx="0.00003971" ixy="0.0000023528" ixz="0.0" iyy="0.0008878" iyz="0.0" izz="0.000888"/>
+    </inertial>
+    <surface>
+      <friction>
+        <ode>
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+        </ode>
+      </friction>
+      <bounce>
+        <restitution_coefficient>0.01</restitution_coefficient>
+        <threshold>0</threshold>
+      </bounce>
+      <contact>
+        <ode>
+          <max_vel>10</max_vel>
+        </ode>
+      </contact>
+    </surface>
+  </link>
+  <joint name="lower_arm_joint" type="revolute">
+  <origin rpy="0 -1.3089969750000001 0" xyz="0.0 0.0 0.117"/>
+    <parent link="elbow_link"/>
+    <child link="lower_arm_link"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="100"/>
+    <dynamics damping="0.1" friction="0.1"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="lower_arm_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/DAE/lower_arm/lower_arm.dae" scale="1.5 1.5 1.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/STL/lower_arm/lower_arm.stl" scale="1.5 1.5 1.5" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0374395000 0.0052225200 0"/>
+      <mass value="0.220991"/>
+      <inertia ixx="0.00006369" ixy="-0.00002292" ixz="0.0" iyy="0.0001677" iyz="0.0" izz="0.0001834"/>
+    </inertial>
+    <surface>
+      <friction>
+        <ode>
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+        </ode>
+      </friction>
+      <bounce>
+        <restitution_coefficient>0.01</restitution_coefficient>
+        <threshold>0</threshold>
+      </bounce>
+      <contact>
+        <ode>
+          <max_vel>10</max_vel>
+        </ode>
+      </contact>
+    </surface>
+  </link>
+  <joint name="wrist_joint" type="revolute">
+  <origin rpy="0 -1.832595765 0" xyz="0.0 0.0 0.1245"/>
+    <parent link="lower_arm_link"/>
+    <child link="wrist_link"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="100"/>
+    <dynamics damping="0.1" friction="0.1"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  <link name="wrist_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/DAE/wrist/wrist.dae" scale="1.5 1.5 1.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/STL/wrist/wrist.stl" scale="1.5 1.5 1.5" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0"/>
+      <mass value="0.085"/>
+      <inertia ixx="0.00003082" ixy="0.0000000191" ixz="0.0000000023" iyy="0.00002822" iyz="0.0000025481" izz="0.00003152"/>
+    </inertial>
+    <surface>
+      <friction>
+        <ode>
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+        </ode>
+      </friction>
+      <bounce>
+        <restitution_coefficient>0.01</restitution_coefficient>
+        <threshold>0</threshold>    <origin rpy="-0.52359879 0 0" xyz="0.0 0.01475 -0.037"/>
+
+      </bounce>
+      <contact>
+        <ode>
+          <max_vel>10</max_vel>
+        </ode>
+      </contact>
+    </surface>
+  </link>
+  <joint name="gripper_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0.0 0.0 0.183"/>
+    <parent link="wrist_link"/>
+    <child link="gripper_link"/>
+    <limit effort="100" lower="-3.14" upper="3.14" velocity="100"/>
+    <dynamics damping="0.1" friction="0.1"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="gripper_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/DAE/gripper/gripper.dae" scale="1.5 1.5 1.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/STL/gripper/gripper.stl" scale="1.5 1.5 1.5" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0"/>
+      <mass value="0.25"/>
+      <inertia ixx="0.00002537" ixy="0.0" ixz="0.0" iyy="0.00001836" iyz="0.000000434" izz="0.00001674"/>
+    </inertial>
+    <surface>
+      <friction>
+        <ode>
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+        </ode>
+      </friction>
+      <bounce>
+        <restitution_coefficient>0.01</restitution_coefficient>
+        <threshold>0</threshold>
+      </bounce>
+      <contact>
+        <ode>
+          <max_vel>10</max_vel>
+        </ode>
+      </contact>
+    </surface>
+  </link>
+
+  <gazebo reference="gripper_link">
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+    <fdir1>1 0 0</fdir1>
+    <maxVel>1.0</maxVel>
+    <minDepth>0.002</minDepth>
+  </gazebo>
+
+  <joint name="finger_joint" type="revolute">
+<origin rpy="-0.52359879 0 0" xyz="0.0 0.022125 -0.0555"/>
+    <parent link="gripper_link"/>
+    <child link="finger_link"/>
+    <limit effort="100" lower="-1.57" upper="1.57" velocity="100"/>
+    <dynamics damping="0.005" friction="0.039"/>
+    <axis xyz="1 0 0"/>
+  </joint>
+  <link name="finger_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/DAE/finger/finger.dae" scale="1.5 1.5 1.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://hv_bot_arm/meshes/STL/finger/finger.stl" scale="1.5 1.5 1.5" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0"/>
+      <mass value="0.016"/>
+      <inertia ixx="0.00009" ixy="0.0" ixz="0.0" iyy="0.00009" iyz="0.0" izz="0.00002"/>
+    </inertial>    <origin rpy="-0.52359879 0 0" xyz="0.0 0.01475 -0.037"/>
+
+    <surface>
+      <friction>
+        <ode>
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+        </ode>
+      </friction>
+      <bounce>
+        <restitution_coefficient>0.01</restitution_coefficient>
+        <threshold>0</threshold>
+      </bounce>
+      <contact>
+        <ode>
+          <max_vel>10</max_vel>
+        </ode>
+      </contact>
+    </surface>
+  </link>
+
+  <gazebo reference="finger_link">
+          <mu1>1.2</mu1>
+          <mu2>1.2</mu2>
+          <kp>1e15</kp>
+          <kd>1e13</kd>
+    <fdir1>1 0 0</fdir1>
+    <maxVel>1.0</maxVel>
+    <minDepth>0.002</minDepth>
+  </gazebo>
+
+
+  <!-- STEP 11 - Gripper camera -->
+  <joint type="fixed" name="gripper_camera_joint">
+    <origin xyz="0.0 0.0 0.0" rpy="0 -1.5707 0"/>
+    <child link="gripper_camera_link"/>
+    <parent link="gripper_link"/>
+  </joint>
+
+  <link name='gripper_camera_link'>
+    <pose>0 0 0 0 0 0</pose>
+    <inertial>
+      <mass value="1.0e-03"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia
+          ixx="1e-6" ixy="0" ixz="0"
+          iyy="1e-6" iyz="0"
+          izz="1e-6"
+      />
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size=".01 .01 .01"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+
+      <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.01 0.01 0.01"/>
+    </geometry>
+  </collision>
+
+  </link>
+
+  <joint type="fixed" name="gripper_camera_optical_joint">
+    <origin xyz="0 0 0" rpy="-1.5707 0 -1.5707"/>
+    <child link="gripper_camera_link_optical"/>
+    <parent link="gripper_camera_link"/>
+  </joint>
+
+  <link name="gripper_camera_link_optical">
+    <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <sphere radius="0.001"/>
+    </geometry>
+  </collision>
+  </link>
+  
+  <joint name="imu_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="imu_link" />
+  </joint>
+
+  <link name="imu_link">
+    <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <sphere radius="0.001"/>
+    </geometry>
+  </collision>
+  </link>
+
+</robot>
